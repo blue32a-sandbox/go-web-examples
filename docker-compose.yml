@@ -3,9 +3,38 @@ version: '3'
 services:
   golang:
     image: golang:1.19-alpine
-    working_dir: /app
-    tty: true
-    volumes:
-      - ./src:/app
     ports:
       - "8000:80"
+    tty: true
+    depends_on:
+      - mysql
+    working_dir: /app
+    volumes:
+      - .:/app
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - db-store:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: hogefuga
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: hogefuga
+    volumes:
+      - phpmyadmin-session:/sessions
+
+volumes:
+  db-store:
+  phpmyadmin-session:
